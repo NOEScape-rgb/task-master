@@ -9,12 +9,12 @@ A full-featured REST API backend for a Todo application built with Node.js, Expr
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST   | `/signup` | Register a new user account |
-| POST   | `/login` | Log in and receive an access token | 
-| POST   | `/logout` | Log out the current user | 
-| POST   | `/forgot-password` | Send a password reset link via email | 
-| PATCH  | `/:username` | Update user profile information | 
-| PATCH  | `/:username/password` | Reset or change user password | 
+| POST   | `/signup` | Register a new user account | NO |
+| POST   | `/login` | Log in and receive an access token | NO |
+| POST   | `/logout` | Log out the current user | NO
+| POST   | `/forgot-password` | Send a password reset link via email | NO
+| PATCH  | `/:username` | Update user profile information | YES |
+| PATCH  | `/:username/password` | Reset or change user password | YES |
 
 ---
 
@@ -24,13 +24,13 @@ _All Todo routes require the user to be logged in._
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| GET    | `/` | Retrieve all todos for the user | 
-| POST   | `/` | Create a new todo item | 
-| DELETE | `/` | Delete all todo items | 
-| GET    | `/:id` | Retrieve a specific todo by ID | 
-| PATCH  | `/:id` | Update a todo's content | 
-| PATCH  | `/:id/status` | Update a todo's completion status | 
-| DELETE | `/:id` | Delete a specific todo item | 
+| GET    | `/` | Retrieve all todos for the user | YES|
+| POST   | `/` | Create a new todo item | YES|
+| DELETE | `/` | Delete all todo items | YES |
+| GET    | `/:id` | Retrieve a specific todo by ID | YES |
+| PATCH  | `/:id` | Update a todo's content | YES |
+| PATCH  | `/:id/status` | Update a todo's completion status | YES |
+| DELETE | `/:id` | Delete a specific todo item | YES | 
 
 ---
 
@@ -39,7 +39,7 @@ _All Todo routes require the user to be logged in._
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| ALL    | `/` | General application routes | 
+| ALL    | `/` | General application routes | NO|
 
 
 ## ✨ Features
