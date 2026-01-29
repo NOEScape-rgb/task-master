@@ -14,7 +14,7 @@ const createUserController = async (req, res) => {
         });
     const result = await userServices.createUser({ username, email, password });
 
-    // Set HTTP-only cookie
+    // Set HTTP-only cookie.
     res.cookie("token", result.token, {
       httpOnly: true,
       // If in production (HTTPS), use Secure. In dev (HTTP), do not.
