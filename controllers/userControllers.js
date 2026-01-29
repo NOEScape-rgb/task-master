@@ -94,7 +94,7 @@ const resetPasswordUserController = async (req, res) => {
     }
 
     // 2. Verify Token & Get User
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const username = decoded.username; 
 
     if (!username) {
