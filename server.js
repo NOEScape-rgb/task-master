@@ -30,7 +30,7 @@ app.use(
   })
 );
 
-// 🔥 PREVENT OPTIONS FROM TOUCHING ANYTHING
+//  PREVENT OPTIONS FROM TOUCHING ANYTHING
 app.options("*", cors());
 app.use((req, res, next) => {
   if (req.method === "OPTIONS") {
