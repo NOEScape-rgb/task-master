@@ -5,8 +5,7 @@ require("dotenv").config();
 const connectDB = require("./config/db");
 const cors = require("cors")
 
-// connecting to database
-connectDB();
+
 
 // importing routes
 const allRoutes = require("./routes/index");
@@ -31,16 +30,32 @@ app.use(
   })
 );
 
+// 🔥 PREVENT OPTIONS FROM TOUCHING ANYTHING
 app.options("*", cors());
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+
+
+
+
+
+// datavse connecing 
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
+
 // setting up routes
-
 app.use("/", allRoutes);
-
 // starting server
 // app.listen(PORT, () => {
 //   console.log(`Server is running on PORT ${PORT}`);
