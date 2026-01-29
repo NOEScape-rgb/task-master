@@ -17,9 +17,12 @@ const createUserController = async (req, res) => {
     // Set HTTP-only cookie
     res.cookie("token", result.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      // If in production (HTTPS), use Secure. In dev (HTTP), do not.
+        secure: process.env.NODE_ENV === "production", 
+        
+        // FIX: dynamic sameSite. 'Lax' allows localhost cookies. 'None' is for cross-site prod.
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: "none",
       // domain : "frontenddomaim.com"
     });
 
@@ -113,9 +116,12 @@ const getUserController = async (req, res) => {
     // Set HTTP-only cookie
     res.cookie("token", result.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      // If in production (HTTPS), use Secure. In dev (HTTP), do not.
+        secure: process.env.NODE_ENV === "production", 
+        
+        // FIX: dynamic sameSite. 'Lax' allows localhost cookies. 'None' is for cross-site prod.
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: "none",
     });
 
     res
