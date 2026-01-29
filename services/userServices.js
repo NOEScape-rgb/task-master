@@ -1,11 +1,11 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const { signToken, tempToken } = require("../utils/jwt");
 const User = require("../models/Users");
 const SECRET_KEY = process.env.SECRET_KEY;
 const sendMail = require('../utils/email')
 
 // Signin  user
-const getUser = async(email, password) => {
+const getUser = async (email, password) => {
   const user = await User.findOne({ email }).select("+password");
   if (!user) throw new Error("User not found");
   const isMatch = await bcrypt.compare(password, user.password);
@@ -91,8 +91,8 @@ const forgotPassword = async (email) => {
   if (!user) throw new Error("User not found");
 
   // generate JWT token, expires in 15 minutes
-  const token =  tempToken({ id: user._id, username: user.username , role : user.role });
-  const subject = "Password reset link"; ;
+  const token = tempToken({ id: user._id, username: user.username, role: user.role });
+  const subject = "Password reset link";;
   const resetLink = `${process.env.FRONT_END_URL}/reset-password?token=${token}`;
   const message = `
       You requested a password reset.
@@ -103,7 +103,7 @@ const forgotPassword = async (email) => {
       This link will expire in 15 minutes.
     `;
   // send token via email
-  const result = await sendMail(email ,subject , message , resetLink )
+  const result = await sendMail(email, subject, message, resetLink)
 };
 
 module.exports = {
