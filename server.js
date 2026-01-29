@@ -43,18 +43,18 @@ app.use(cookieParser());
 
 // database connecting 
 app.use(async (req, res, next) => {
+  
   if (req.method === "OPTIONS") {
     return next();
   }
 
- 
   try {
     await connectDB();
     next();
-  } catch (error) {
-    console.error("Database Connection Failed:", error);
+  } catch (err) {
+    console.log(err);
     
-    res.status(500).json({ message: "Database connection failed", error: error.message });
+    res.status(500).json({ error: "Database connection failed" });
   }
 });
 // setting up routes
