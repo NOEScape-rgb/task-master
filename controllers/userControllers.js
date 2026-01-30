@@ -213,7 +213,25 @@ const forgotPasswordController = async (req, res) => {
     res.status(500).json({ isStatus: false, msg: error.message });
   }
 };
+const changePasswordController = async (req, res) => {
+  try {
+    const { username , password } = req.body;
+  if (!username ) return res.status(400).json({ isStatus: false, msg: "username is missing" });
+  if (!password ) return res.status(400).json({ isStatus: false, msg: "password is missing" });
 
+
+    const result = await userServices.reset(username , password);
+
+    // In production, send the token via email
+    res.status(200).json({
+      isStatus: true,
+      msg: "password is sucessfully changed",
+      data: null,
+    });
+  } catch (error) {
+    res.status(500).json({ isStatus: false, msg: error.message });
+  }
+};
 
 
 const getProfileController = (req, res) => {
@@ -234,6 +252,6 @@ module.exports = {
   getUserController,
   logoutController,
   forgotPasswordController,
-  getProfileController 
-
+  getProfileController ,
+  changePasswordController
 };

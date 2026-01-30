@@ -7,10 +7,10 @@ const {
   updateUserController,
   resetPasswordUserController,
   logoutController,
-  forgotPasswordController,
-  getProfileController
+  forgotPasswordController, 
+  getProfileController,
+  changePasswordController
 } = require("../controllers/userControllers");
-
 // for users
 router.post("/signup", createUserController);
 router.post("/login", getUserController);
@@ -19,6 +19,8 @@ router.patch("/password", resetPasswordUserController);
 router.post("/forgot-password", forgotPasswordController);
 router.patch("/:username", verifyUser, updateUserController);
 router.get("/me", verifyUser, getProfileController); 
+router.patch("/change-password", changePasswordController);
+
 
 module.exports = router;
 

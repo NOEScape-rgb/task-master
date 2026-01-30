@@ -107,7 +107,11 @@ const forgotPassword = async (email) => {
   // send token via email
   const result = await sendMail(email, subject, message, resetLink)
 };
-
+const changePassword = async(password) =>{
+  const user = await User.findOne({ username });
+  if (!user) throw new Error("User not found");
+  
+}
 module.exports = {
   getUser,
   reset,
