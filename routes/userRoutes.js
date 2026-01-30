@@ -19,7 +19,7 @@ router.patch("/password", resetPasswordUserController);
 router.post("/forgot-password", forgotPasswordController);
 router.patch("/:username", verifyUser, updateUserController);
 router.get("/me", verifyUser, getProfileController); 
-router.patch(":username/change-password", verifyUser,changePasswordController);
+router.patch("/:username/change-password", verifyUser,changePasswordController);
 
 
 module.exports = router;
