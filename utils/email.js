@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 const getResetPasswordTemplate = require("./emailTemplates");
 const MAIL_PASS = process.env.MAIL_PASS;
+const sendVerficationTemplate = require('./sendVerificationTemplate')
 // Create a transporter using Ethereal test credentials.
 // For production, replace with your actual SMTP server details.
 const transporter = nodemailer.createTransport({
@@ -27,6 +28,24 @@ const sendMail = async (senderMail, subject, Message , resetLink) => {
   return info.messageId;
 };
 
-module.exports = sendMail;
+// send email verfication
+
+const sendVerificationMail = async (senderMail, subject, Message  , verificationLink) => {
+
+  const info = await transporter.sendMail({
+    from: '"TaskMaster App" <naseebnoman39@gmail.com>',
+    to: senderMail,
+    subject: subject,
+    text: Message, // Plain-text version of the message
+    html: sendVerficationTemplate(verificationLink), // HTML version of the message
+  });
+  
+
+  return info.messageId;
+};
+
+
+
+module.exports = { sendMail , sendVerificationMail};
 
 

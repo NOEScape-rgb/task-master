@@ -7,19 +7,27 @@ const {
   updateUserController,
   resetPasswordUserController,
   logoutController,
-  forgotPasswordController, 
+  forgotPasswordController,
   getProfileController,
-  changePasswordController
+  changePasswordController,
+  verifyEmailController
 } = require("../controllers/userControllers");
+
+
+
+// for users
 // for users
 router.post("/signup", createUserController);
 router.post("/login", getUserController);
 router.post("/logout", logoutController);
 router.patch("/password", resetPasswordUserController);
 router.post("/forgot-password", forgotPasswordController);
+
+router.get("/me", verifyUser, getProfileController);
+router.patch("/change-password", verifyUser, changePasswordController);
+router.get("/verify-email", verifyEmailController)
+
 router.patch("/:username", verifyUser, updateUserController);
-router.get("/me", verifyUser, getProfileController); 
-router.patch("/:username/change-password", verifyUser,changePasswordController);
 
 module.exports = router;
 

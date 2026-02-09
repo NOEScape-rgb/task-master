@@ -1,52 +1,38 @@
-const cookieParser = require("cookie-parser");
 const userServices = require("../services/userServices");
 
 // controller for signUp a user
 const createUserController = async (req, res) => {
   try {
+    await User.deleteMany({
+      $or: [{ email }, { username }],
+      isVerified: false,
+      verificationTokenExpires: { $lt: Date.now() }, // Expired tokens ONLY
+    });
     const { username, email, password } = req.body;
     if (!username || !email || !password)
-      return res
-        .status(400)
-        .json({
-          isStatus: false,
-          msg: "Please provide all required fields",
-          data: null,
-        });
+      return res.status(400).json({
+        isStatus: false,
+        msg: "Please provide all required fields",
+        data: null,
+      });
     const result = await userServices.createUser({ username, email, password });
 
-    // Set HTTP-only cookie.
-    res.cookie("token", result.token, {
-      httpOnly: true,
-      // If in production (HTTPS), use Secure. In dev (HTTP), do not.
-        secure: process.env.NODE_ENV === "production", 
-        
-        // FIX: dynamic sameSite. 'Lax' allows localhost cookies. 'None' is for cross-site prod.
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      // domain : "frontenddomaim.com"
+    res.status(201).json({
+      isStatus: true,
+      msg: "User created successfully",
+      data: result.user,
     });
-
-    res
-      .status(201)
-      .json({
-        isStatus: true,
-        msg: "User created successfully",
-        data: result.user,
-      });
   } catch (error) {
     if (error.message === "User already exists") {
       return res
         .status(409)
         .json({ isStatus: false, msg: error.message, data: null });
     }
-    res
-      .status(500)
-      .json({
-        isStatus: false,
-        msg: error.message || "Internal Server Error",
-        data: null,
-      });
+    res.status(500).json({
+      isStatus: false,
+      msg: error.message || "Internal Server Error",
+      data: null,
+    });
   }
 };
 
@@ -69,7 +55,7 @@ const updateUserController = async (req, res) => {
 };
 
 // controller for resetting password
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const resetPasswordUserController = async (req, res) => {
   try {
@@ -95,7 +81,7 @@ const resetPasswordUserController = async (req, res) => {
 
     // 2. Verify Token & Get User
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    const username = decoded.username; 
+    const username = decoded.username;
 
     if (!username) {
       return res.status(403).json({
@@ -107,26 +93,23 @@ const resetPasswordUserController = async (req, res) => {
     // 3. Perform Reset
     await userServices.reset(username, password);
 
-   
-
     return res.status(200).json({
       isStatus: true,
       msg: "Password updated successfully",
       data: null,
     });
-
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ 
-        isStatus: false, 
-        msg: "Session or link has expired. Please login or request a new link." 
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        isStatus: false,
+        msg: "Session or link has expired. Please login or request a new link.",
       });
     }
-    
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(403).json({ 
-        isStatus: false, 
-        msg: "Invalid token." 
+
+    if (error.name === "JsonWebTokenError") {
+      return res.status(403).json({
+        isStatus: false,
+        msg: "Invalid token.",
       });
     }
 
@@ -143,23 +126,21 @@ const getUserController = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password)
-      return res
-        .status(400)
-        .json({
-          isStatus: false,
-          msg: "Please provide email and password",
-          data: null,
-        });
+      return res.status(400).json({
+        isStatus: false,
+        msg: "Please provide email and password",
+        data: null,
+      });
     const result = await userServices.getUser(email, password);
 
     // Set HTTP-only cookie
     res.cookie("token", result.token, {
       httpOnly: true,
       // If in production (HTTPS), use Secure. In dev (HTTP), do not.
-        secure: process.env.NODE_ENV === "production", 
-        
-        // FIX: dynamic sameSite. 'Lax' allows localhost cookies. 'None' is for cross-site prod.
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+
+      // FIX: dynamic sameSite. 'Lax' allows localhost cookies. 'None' is for cross-site prod.
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -177,13 +158,17 @@ const getUserController = async (req, res) => {
         .status(401)
         .json({ isStatus: false, msg: error.message, data: null });
     }
-    res
-      .status(500)
-      .json({
+    if (error.message === "Please verify your Email first") {
+      return res.status(403).json({
         isStatus: false,
-        msg: error.message || "Internal Server Error",
-        data: null,
+        msg: error.message,
       });
+    }
+    res.status(500).json({
+      isStatus: false,
+      msg: error.message || "Internal Server Error",
+      data: null,
+    });
   }
 };
 
@@ -207,7 +192,7 @@ const forgotPasswordController = async (req, res) => {
     res.status(200).json({
       isStatus: true,
       msg: "Reset token generated. (Send via email )",
-      data: null,
+      data: result,
     });
   } catch (error) {
     res.status(500).json({ isStatus: false, msg: error.message });
@@ -215,35 +200,59 @@ const forgotPasswordController = async (req, res) => {
 };
 const changePasswordController = async (req, res) => {
   try {
-    const { username , password } = req.body;
-  if (!username ) return res.status(400).json({ isStatus: false, msg: "username is missing" });
-  if (!password ) return res.status(400).json({ isStatus: false, msg: "password is missing" });
+    const { password } = req.body;
+    const username = req.user.username;
+    if (!username)
+      return res
+        .status(400)
+        .json({ isStatus: false, msg: "username is missing" });
+    if (!password)
+      return res
+        .status(400)
+        .json({ isStatus: false, msg: "password is missing" });
 
-
-    const result = await userServices.reset(username , password);
+    const result = await userServices.reset(username, password);
 
     // In production, send the token via email
     res.status(200).json({
       isStatus: true,
       msg: "password is sucessfully changed",
-      data: null,
+      data: result,
     });
   } catch (error) {
     res.status(500).json({ isStatus: false, msg: error.message });
   }
 };
 
-
 const getProfileController = (req, res) => {
-  
   res.status(200).json({
     isStatus: true,
     msg: "User is authenticated",
-    data: req.user 
+    data: req.user,
   });
 };
 
+// controller for verification Email
 
+const verifyEmailController = async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token)
+      return res.status(400).json({ isStatus: false, msg: "token is missing" });
+    const user = await userServices.verifyEmail(token);
+    res.status(201).json({
+      isStatus: true,
+      message: "user Sucessfully Verified",
+      data: {
+        id: user._id,
+        email: user.email,
+        isVerified: user.isVerified,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ isStatus: false, msg: error.message });
+  }
+};
 
 module.exports = {
   createUserController,
@@ -252,6 +261,7 @@ module.exports = {
   getUserController,
   logoutController,
   forgotPasswordController,
-  getProfileController ,
-  changePasswordController
+  getProfileController,
+  changePasswordController,
+  verifyEmailController,
 };

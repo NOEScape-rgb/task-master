@@ -20,12 +20,21 @@ const todoSchema = new mongoose.Schema({
   dueDate: {
     type: Date,
     validate: {
-      validator: function(value) {
-        return !value || value >= new Date(); // allow null, but if set, must be future
+      validator: function (value) {
+        if (!value) return true;
+  
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+  
+        const due = new Date(value);
+        due.setHours(0, 0, 0, 0);
+  
+        return due >= today;
       },
       message: "Due date cannot be in the past"
     }
-  },
+  }
+,
 
   isDone: {
     type: Boolean,
