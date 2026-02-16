@@ -11,7 +11,8 @@ const {
   getProfileController,
   changePasswordController,
   verifyEmailController,
-  uploadProfileImageController,
+  updateProfileImageController,
+  signImageController,
 } = require("../controllers/userControllers");
 const passport = require("../config/passport");
 const googleCallbackController = require("../controllers/googleCallbackController");
@@ -46,6 +47,7 @@ router.patch("/change-password", verifyUser, changePasswordController);
 router.get("/verify-email", verifyEmailController);
 
 router.patch("/:username", verifyUser, updateUserController);
-router.patch('/:username/upload-image', verifyToken, verifyUser, upload.single("profileImage"),uploadProfileImageController)
+router.patch('/:username/sign-upload', verifyToken, verifyUser, signImageController)
+router.patch('/:username/upload-image', verifyToken, verifyUser, updateProfileImageController)
 
 module.exports = router;

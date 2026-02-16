@@ -156,11 +156,11 @@ const verifyEmail = async (token) => {
     
   }
 // services for uploading profile image 
-const updateProfileImage = async (username, imageUrl) => {
+const updateProfileImage = async (username, profileImageUrl) => {
   const user = await User.findOneAndUpdate(
     { username },
-    { profileImage: imageUrl },
-    { new: true } // Returns the updated document
+    { profileImage: profileImageUrl },
+    { new: true } 
   );
 
   if (!user) throw new Error("User not found");

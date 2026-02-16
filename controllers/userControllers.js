@@ -1,6 +1,6 @@
 const userServices = require("../services/userServices");
 const User = require("../models/Users");
-
+const cloudinary = require('cloudinary').v2;
 // controller for signUp a user
 const createUserController = async (req, res) => {
   try {
@@ -267,22 +267,16 @@ const verifyEmailController = async (req, res) => {
 };
 
 // upload user controoler
-const uploadProfileImageController = async (req, res) => {
+const updateProfileImageController = async (req, res) => {
   try {
     const { username } = req.params;
 
-    // The middleware attaches the Cloudinary URL to req.file.path
-    if (!req.file || !req.file.path) {
-      return res.status(400).json({
-        isStatus: false,
-        msg: "No file uploaded or upload failed",
-        data: null,
-      });
-    }
+    const { profileImageUrl } = req.body; 
+    if (!profileImageUrl) {
+          return res.status(400).json({ isStatus: false, msg: "Image URL is required" });
+        }
 
-    const imageUrl = req.file.path;
-
-    const user = await userServices.updateProfileImage(username, imageUrl);
+    const user = await userServices.updateProfileImage(username, profileImageUrl);
 
     res.status(200).json({
       isStatus: true,
@@ -297,6 +291,39 @@ const uploadProfileImageController = async (req, res) => {
   }
 };
 
+const signImageController = async (req, res) => {
+  try {
+    // Generating  a current Unix timestamp (seconds)
+    const timestamp = Math.round(new Date().getTime() / 1000);
+
+    // Generate the signature 
+    const signature = cloudinary.utils.api_sign_request(
+      {
+        timestamp: timestamp,
+        folder: 'taskmaster_profile_images',
+      },
+      process.env.CLOUDINARY_API_SECRET
+    );
+
+    //  Returning  everything the client needs to talk to Cloudinary
+    res.status(200).json({
+      isStatus: true,
+      msg: "Signature generated successfully",
+      data: {
+        signature,
+        timestamp,
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        apiKey: process.env.CLOUDINARY_API_KEY
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      isStatus: false,
+      msg: "Failed to generate signature",
+      error: error.message
+    });
+  }
+};
 
 module.exports = {
   createUserController,
@@ -308,5 +335,6 @@ module.exports = {
   getProfileController,
   changePasswordController,
   verifyEmailController,
-  uploadProfileImageController
+  updateProfileImageController,
+  signImageController
 };
