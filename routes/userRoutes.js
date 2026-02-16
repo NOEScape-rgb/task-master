@@ -16,9 +16,9 @@ const {
 } = require("../controllers/userControllers");
 const passport = require("../config/passport");
 const googleCallbackController = require("../controllers/googleCallbackController");
-const upload = require("../middlewares/uploadMiddleware");
 
-// for users google login
+
+ 
 
 // google auth
 router.get(
