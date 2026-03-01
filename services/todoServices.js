@@ -17,7 +17,9 @@ const getAllTodos = async (username) => {
   const todos = await Todo.find({ username }).sort({ createdAt: -1 });
 
   try {
-    await redisClient.set(cacheKey, JSON.stringify(todos));
+    await redisClient.set(cacheKey, JSON.stringify(todos), {
+      EX: 3600
+    });
   } catch (error) {
     console.error("Redis SET error:", error);
   }
@@ -111,10 +113,23 @@ const deleteAllTodo = async (username) => {
 
   try {
     await redisClient.del(listCacheKey);
-    const itemKeys = await redisClient.keys(`todos:${username}:*`);
-    if (itemKeys.length > 0) {
-      await redisClient.del(itemKeys);
-    }
+    const batch = [];
+
+for await (const key of redisClient.scanIterator({
+  MATCH: `todos:${username}:*`,
+  COUNT: 100
+})) {
+  batch.push(key);
+
+  if (batch.length === 100) {
+    await redisClient.del(batch);
+    batch.length = 0;
+  }
+}
+
+if (batch.length > 0) {
+  await redisClient.del(batch);
+}
   } catch (error) {
     console.error("Redis keys/DEL error:", error);
   }
@@ -138,7 +153,9 @@ const getTodo = async (id, username) => {
   if (!todo) throw new Error("Todo not found");
 
   try {
-    await redisClient.set(cacheKey, JSON.stringify(todo));
+    await redisClient.set(cacheKey, JSON.stringify(todo), {
+      EX: 3600
+    });
   } catch (error) {
     console.error("Redis SET error:", error);
   }
